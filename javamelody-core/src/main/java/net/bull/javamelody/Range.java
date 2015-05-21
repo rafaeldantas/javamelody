@@ -42,6 +42,10 @@ final class Range implements Serializable {
 
 	private final Date endDate;
 
+	private final Date customPeriodStartDate;
+
+	private final Date customPeriodEndDate;
+
 	private Range(Period period, Date startDate, Date endDate) {
 		super();
 		assert period != null && startDate == null && endDate == null || period == null
@@ -49,6 +53,20 @@ final class Range implements Serializable {
 		this.period = period;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.customPeriodStartDate = startDate;
+		this.customPeriodEndDate = endDate;
+	}
+
+	private Range(Period period, Date startDate, Date endDate, Date customPeriodStartDate,
+			Date customPeriodEndDate) {
+		super();
+		assert period != null && startDate == null && endDate == null || period == null
+				&& startDate != null && endDate != null && startDate.getTime() <= endDate.getTime();
+		this.period = period;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.customPeriodStartDate = customPeriodStartDate;
+		this.customPeriodEndDate = customPeriodEndDate;
 	}
 
 	static Range createPeriodRange(Period period) {
@@ -98,8 +116,10 @@ final class Range implements Serializable {
 				return Period.JOUR.getRange();
 			}
 		}
+
 		// rq: on pourrait essayer aussi des dateFormat alternatifs,
 		// par exemple même pattern mais sans les slashs ou juste avec jour et mois
+
 		final DateFormat dateFormat = I18N.createDateFormat();
 		Date startDate;
 		try {
@@ -165,5 +185,26 @@ final class Range implements Serializable {
 	public String toString() {
 		return getClass().getSimpleName() + "[period=" + getPeriod() + ", startDate="
 				+ getStartDate() + ", endDate=" + getEndDate() + ']';
+	}
+
+	public Range customPeriod(Date customStartDate, Date customEndDate) {
+		return new Range(this.period, this.startDate, this.endDate, customStartDate, customEndDate);
+	}
+
+	public Date getCustomPeriodStartDate() {
+		return customPeriodStartDate;
+	}
+
+	public Date getCustomPeriodEndDate() {
+		return customPeriodEndDate;
+	}
+
+	public boolean isCustomPeriod() {
+		return getCustomPeriodStartDate() != null && getCustomPeriodEndDate() != null;
+	}
+
+	public long getIntervalInMinutes() {
+		return (getCustomPeriodEndDate().getTime() - getCustomPeriodStartDate().getTime())
+				/ (60 * 1000) % 60;
 	}
 }

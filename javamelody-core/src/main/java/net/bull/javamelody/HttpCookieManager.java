@@ -19,6 +19,10 @@ package net.bull.javamelody;
 
 import static net.bull.javamelody.HttpParameters.PERIOD_PARAMETER;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +33,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 class HttpCookieManager {
 	private static final String PERIOD_COOKIE_NAME = "javamelody.period";
+
+	private static final String CUSTOM_PERIOD = "custom.period";
 
 	// période par défaut : jour
 	private static Range defaultRange = Period.JOUR.getRange();
@@ -49,8 +55,31 @@ class HttpCookieManager {
 			// un paramètre period est présent dans la requête :
 			// l'utilisateur a choisi une période, donc on fixe le cookie
 			addCookie(req, resp, PERIOD_COOKIE_NAME, range.getValue());
+			addCookie(req, resp, CUSTOM_PERIOD, null);
+
 		}
-		return range;
+
+		if (req.getParameter(CUSTOM_PERIOD) != null) {
+			addCookie(req, resp, CUSTOM_PERIOD, req.getParameter(CUSTOM_PERIOD));
+		}
+		Cookie customPeriod = getCookieByName(req, CUSTOM_PERIOD);
+		if (customPeriod == null || customPeriod.getValue() == null
+				|| customPeriod.getValue().trim().equals("")) {
+			return range;
+		}
+
+		String customPeriodValue = customPeriod.getValue();
+		int index = customPeriodValue.indexOf(Range.CUSTOM_PERIOD_SEPARATOR);
+		try {
+			Date startDate = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss").parse(customPeriodValue
+					.substring(0, index));
+			Date endDate = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss").parse(customPeriodValue
+					.substring(index + 1));
+			return range.customPeriod(startDate, endDate);
+		} catch (ParseException e) {
+			throw new IllegalArgumentException("Could not parse custom date", e);
+		}
+
 	}
 
 	Cookie getCookieByName(HttpServletRequest req, String cookieName) {

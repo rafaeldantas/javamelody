@@ -42,6 +42,7 @@ import org.jrobin.core.RrdException;
 import org.jrobin.core.Sample;
 import org.jrobin.core.Util;
 import org.jrobin.graph.RrdGraph;
+import org.jrobin.graph.RrdGraphConstants;
 import org.jrobin.graph.RrdGraphDef;
 
 /**
@@ -240,7 +241,11 @@ final class JRobin {
 		// starting timestamp will be adjusted for each graph
 		final long endTime;
 		final long startTime;
-		if (range.getPeriod() == null) {
+
+		if (range.isCustomPeriod()) {
+			endTime = (range.getCustomPeriodEndDate().getTime() + 500L) / 1000L;
+			startTime = (range.getCustomPeriodStartDate().getTime() + 500L) / 1000L;
+		} else if (range.getPeriod() == null) {
 			// si endDate à la date du jour, alors on ne dépasse pas l'heure courante
 			endTime = Math.min(range.getEndDate().getTime() / 1000, Util.getTime());
 			startTime = range.getStartDate().getTime() / 1000;
@@ -292,6 +297,13 @@ final class JRobin {
 			graphDef.setShowSignature(false);
 			graphDef.setTitle(null);
 		}
+
+		//If the interval is less than 21 minutes, plot the Time Axis of the graph with minute based labels
+		if (range.isCustomPeriod() && range.getIntervalInMinutes() < 21) {
+			graphDef.setTimeAxis(RrdGraphConstants.SECOND, 10, RrdGraphConstants.MINUTE, 1,
+					RrdGraphConstants.MINUTE, 1, 0, "HH:mm:ss");
+		}
+
 		//		graphDef.setColor(RrdGraphConstants.COLOR_BACK, new GradientPaint(0, 0,
 		//				RrdGraphConstants.DEFAULT_BACK_COLOR.brighter(), 0, height,
 		//				RrdGraphConstants.DEFAULT_BACK_COLOR));
