@@ -195,6 +195,18 @@ final class Range implements Serializable {
 		return customPeriodStartDate;
 	}
 
+	private long withoutMillis(Date date) {
+		return ((date.getTime() + 500L) / 1000L);
+	}
+
+	public long getCustomPeriodStartDateWithouMillis() {
+		return withoutMillis(customPeriodStartDate);
+	}
+
+	public long getCustomPeriodEndDateWithoutMillis() {
+		return withoutMillis(customPeriodEndDate);
+	}
+
 	public Date getCustomPeriodEndDate() {
 		return customPeriodEndDate;
 	}

@@ -36,6 +36,8 @@ class HttpCookieManager {
 
 	private static final String CUSTOM_PERIOD = "custom.period";
 
+	private static final String CUSTOM_PERIOD_DATE_FORMAT = "dd/MM/yyyy-HH:mm:ss";
+
 	// période par défaut : jour
 	private static Range defaultRange = Period.JOUR.getRange();
 
@@ -71,9 +73,9 @@ class HttpCookieManager {
 		String customPeriodValue = customPeriod.getValue();
 		int index = customPeriodValue.indexOf(Range.CUSTOM_PERIOD_SEPARATOR);
 		try {
-			Date startDate = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss").parse(customPeriodValue
-					.substring(0, index));
-			Date endDate = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss").parse(customPeriodValue
+			Date startDate = new SimpleDateFormat(CUSTOM_PERIOD_DATE_FORMAT)
+					.parse(customPeriodValue.substring(0, index));
+			Date endDate = new SimpleDateFormat(CUSTOM_PERIOD_DATE_FORMAT).parse(customPeriodValue
 					.substring(index + 1));
 			return range.customPeriod(startDate, endDate);
 		} catch (ParseException e) {

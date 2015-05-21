@@ -243,8 +243,8 @@ final class JRobin {
 		final long startTime;
 
 		if (range.isCustomPeriod()) {
-			endTime = (range.getCustomPeriodEndDate().getTime() + 500L) / 1000L;
-			startTime = (range.getCustomPeriodStartDate().getTime() + 500L) / 1000L;
+			endTime = range.getCustomPeriodEndDateWithoutMillis();
+			startTime = range.getCustomPeriodStartDateWithouMillis();
 		} else if (range.getPeriod() == null) {
 			// si endDate à la date du jour, alors on ne dépasse pas l'heure courante
 			endTime = Math.min(range.getEndDate().getTime() / 1000, Util.getTime());
